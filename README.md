@@ -1,2 +1,2 @@
 # Project Repository 
-# My change
+# This is sample repository
