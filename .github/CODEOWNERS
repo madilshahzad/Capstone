@@ -2,7 +2,12 @@
 # Lines starting with '#' are comments.
 # Each line is a file pattern followed by one or more owners.
 
-# Specify the default code owners for the repository
+<!-- # These owners will be the default owners for everything in the repo.
+*       @default-owner
 
-@madilshahzad
+# Specify owners for specific directories
+/docs/  @docs-owner
+/src/   @src-owner -->
 
+# Specify owners for specific files
+README.md   @madilshahzad
