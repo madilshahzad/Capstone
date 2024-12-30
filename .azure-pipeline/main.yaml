@@ -1,0 +1,15 @@
+trigger: none
+
+pool:
+  name: Linux_Server
+
+steps:
+- checkout: self
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+    architecture: 'x64'
+  displayName: 'Set up Python Environment'
+
