@@ -9,8 +9,6 @@ steps:
 
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: '3.x'
-    addToPath: true
+    versionSpec: '3.8'
+    addToPath: false
     architecture: 'x64'
-  displayName: 'Set up Python Environment'
-
