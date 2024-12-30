@@ -4,6 +4,7 @@ pool:
   name: 'Capstone-VM'
 
 steps:
+
 - checkout: self
 
 - task: UsePythonVersion@0
