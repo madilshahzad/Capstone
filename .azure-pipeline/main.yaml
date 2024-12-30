@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: Linux_Server
+  name: 'Capstone-VM'
 
 steps:
 - checkout: self
