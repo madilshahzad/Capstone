@@ -8,6 +8,17 @@ variables:
   dockerImageName: 'spring-boot-app'
 
 stages:
+  - stage: whoami
+    displayName: 'Print User Information'
+    jobs:
+      - job: whoamiJob
+        displayName: 'Print User Information'
+        steps:
+          - script: |
+              echo "User Information"
+              whoami
+            displayName: 'Print User Information'
+            
   - stage: Checkout
     displayName: 'Checkout Code'
     jobs:
