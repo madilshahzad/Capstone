@@ -3,12 +3,43 @@ trigger: none
 pool:
   name: 'Capstone-VM'
 
-steps:
+variables:
+  mavenOptions: '-DskipTests'
+  dockerImageName: 'spring-boot-app'
 
-- checkout: self
+stages:
+  - stage: Checkout
+    displayName: 'Checkout Code'
+    jobs:
+      - job: CheckoutJob
+        displayName: 'Checkout Repository'
+        steps:
+          - checkout: self
+            displayName: 'Checkout Code from Repository'
 
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.8'
-    addToPath: false
-    architecture: 'x64'
+  - stage: Build
+    displayName: 'Build Maven Application'
+    dependsOn: Checkout
+    jobs:
+      - job: BuildJob
+        displayName: 'Build and Package Application'
+        steps:
+          - script: |
+              echo "Building the project with Maven..."
+              mvn clean package $(mavenOptions)
+            displayName: 'Build the Maven Project'
+            workingDirectory: $(Build.SourcesDirectory)
+
+  - stage: BuildDockerImage
+    displayName: 'Build Docker Image'
+    dependsOn: Build
+    jobs:
+      - job: DockerBuildJob
+        displayName: 'Build Docker Image for Application'
+        steps:
+          - script: |
+              echo "Building Docker Image..."
+              docker build -t $(dockerImageName):$(Build.BuildId) .
+            displayName: 'Build Docker Image'
+          
+   
