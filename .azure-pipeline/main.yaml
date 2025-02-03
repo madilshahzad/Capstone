@@ -14,10 +14,9 @@ stages:
       - job: whoamiJob
         displayName: 'Print User Information'
         steps:
-          - script: |
-              echo "User Information"
-              whoami
-            displayName: 'Print User Information'
+          - script: echo "Project GUID is: $(System.TeamProjectId)"
+            displayName: "Display Project GUID"
+
             
   - stage: Checkout
     displayName: 'Checkout Code'
