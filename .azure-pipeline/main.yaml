@@ -14,10 +14,10 @@ stages:
       - job: whoamiJob
         displayName: 'Print User Information'
         steps:
-          - script: echo "Project GUID is: $(System.TeamProjectId)"
+          - script: |
+              echo "Project GUID is: $(System.TeamProjectId)"
             displayName: "Display Project GUID"
 
-            
   - stage: Checkout
     displayName: 'Checkout Code'
     jobs:
@@ -51,5 +51,3 @@ stages:
               echo "Building Docker Image..."
               docker build -t $(dockerImageName):$(Build.BuildId) .
             displayName: 'Build Docker Image'
-          
-   
