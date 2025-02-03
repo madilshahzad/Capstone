@@ -58,9 +58,25 @@ stages:
               scriptType: 'bash'
               script: |
                 echo "Authenticating to AWS ECR..."
+                export AWS_DEFAULT_REGION=$(awsRegion)
+                
+                # Verify OIDC authentication by checking AWS identity
+                echo "Verifying OIDC authentication..."
+                aws sts get-caller-identity --no-cli-pager
+
+                # Authenticate Docker with AWS ECR
+                echo "Retrieving AWS ECR login token..."
                 aws ecr get-login-password --region $(awsRegion) | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
 
-          # Tag the Docker image with the full ECR URI
+                # Check login success
+                if [ $? -eq 0 ]; then
+                  echo "Successfully authenticated to AWS ECR."
+                else
+                  echo "AWS ECR authentication failed!" >&2
+                  exit 1
+                fi
+
+          # Tag the Docker image
           - script: |
               echo "Tagging Docker image..."
               docker tag $(dockerImageName):$(Build.BuildId) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
@@ -70,4 +86,7 @@ stages:
           - script: |
               echo "Pushing Docker image to ECR..."
               docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
+              echo "Docker image successfully pushed to ECR!"
             displayName: 'Push Docker Image'
+
+
