@@ -1,23 +1,13 @@
 trigger: none
 
+# Import variables from the variable group "capstone-prod"
+variables:
+  - group: capstone-prod
+
 pool:
   name: 'Capstone-VM'
 
-variables:
-  mavenOptions: '-DskipTests'
-  dockerImageName: 'spring-boot-app'
-
 stages:
-  - stage: whoami
-    displayName: 'Print User Information'
-    jobs:
-      - job: whoamiJob
-        displayName: 'Print User Information'
-        steps:
-          - script: |
-              echo "Project GUID is: $(System.TeamProjectId)"
-            displayName: "Display Project GUID"
-
   - stage: Checkout
     displayName: 'Checkout Code'
     jobs:
@@ -51,3 +41,33 @@ stages:
               echo "Building Docker Image..."
               docker build -t $(dockerImageName):$(Build.BuildId) .
             displayName: 'Build Docker Image'
+
+  - stage: PushToECR
+    displayName: 'Push Docker Image to ECR'
+    dependsOn: BuildDockerImage
+    jobs:
+      - job: PushJob
+        displayName: 'Authenticate, Tag, and Push Docker Image'
+        steps:
+          # Authenticate to ECR using the AWS service connection (OIDC-based)
+          - task: AWSShellScript@1
+            displayName: 'Authenticate to AWS ECR using OIDC'
+            inputs:
+              awsCredentials: 'AWS-Prod-Connection'
+              regionName: '$(awsRegion)'
+              scriptType: 'bash'
+              script: |
+                echo "Authenticating to AWS ECR..."
+                aws ecr get-login-password --region $(awsRegion) | docker login --username AWS --password-stdin $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com
+
+          # Tag the Docker image with the full ECR URI
+          - script: |
+              echo "Tagging Docker image..."
+              docker tag $(dockerImageName):$(Build.BuildId) $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
+            displayName: 'Tag Docker Image'
+
+          # Push the Docker image to ECR
+          - script: |
+              echo "Pushing Docker image to ECR..."
+              docker push $(awsAccountId).dkr.ecr.$(awsRegion).amazonaws.com/$(ecrRepository):$(Build.BuildId)
+            displayName: 'Push Docker Image'
